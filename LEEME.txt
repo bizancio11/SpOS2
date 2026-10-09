@@ -1,0 +1,20 @@
+SpOS2 2.3  -  escritorio en pygame (Linux Mint)
+Colores: negro, verde, azul y rojo.   Versiones: N (Normal) | </> Programmer | Premium
+
+  ./ejecutar.sh [normal|programmer|premium]   ejecutar desde el codigo
+  ./build_pyinstaller.sh                      compila los 3 binarios (dist/) y despues las 3 ISOs
+  ./build_pyinstaller.sh --sin-iso            solo los 3 binarios
+  ./build_iso.sh                              solo las 3 ISOs (antes: ./build_pyinstaller.sh --sin-iso)
+  ./ejecutar.sh [edicion] [--bin | --iso]     ejecutar: codigo fuente, binario de dist/ o ISO en QEMU
+
+Resultado:  dist/SpOS2-N.iso   dist/SpOS2-Programmer.iso   dist/SpOS2-Premium.iso
+Cada ISO es un Linux minimo (Ubuntu, BIOS+UEFI) que arranca directo en el binario de su version.
+Requisitos ISOs: sudo apt install debootstrap squashfs-tools xorriso mtools grub-pc-bin grub-efi-amd64-bin
+                 ~12 GB libres en /var/tmp, internet, y sudo.  Cada ISO pesa cerca de 1 GB.
+Teclado de la ISO: KEYMAP=es ./build_iso.sh (por defecto latam)
+
+La ISO es "live": los datos de ~/SpOS2 (cuentas, config) se pierden al apagar.
+Datos en Linux Mint: ~/SpOS2 (cuentas, config, carpetas Musica/Proyectos/Documentos).
+Musica: arrastra .mp3/.ogg/.wav/.flac a la ventana Musica, o usa Archivos / "play archivo.mp3".
+WiFi real: NetworkManager (nmcli); sin eso, modo demostracion.
+kernel/ contiene el kernel de arranque anterior (GRUB/QEMU): cd kernel && make run
