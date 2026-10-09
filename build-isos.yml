@@ -1,0 +1,66 @@
+name: Build SpOS2 ISOs
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Get SpOS2 source
+        uses: actions/checkout@v7
+
+      - name: Free disk space for three Live ISOs
+        shell: bash
+        run: |
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/local/lib/android \
+            /opt/ghc \
+            /usr/local/share/powershell \
+            /usr/share/swift \
+            /opt/hostedtoolcache/CodeQL || true
+          sudo apt-get clean
+          df -h /var/tmp
+
+      - name: Install ISO build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            debootstrap squashfs-tools xorriso mtools \
+            grub-pc-bin grub-efi-amd64-bin \
+            python3-venv python3-dev build-essential
+
+      - name: Build Normal, Programmer and Premium editions
+        env:
+          MIRROR: http://ar.archive.ubuntu.com/ubuntu
+          KEYMAP: latam
+        run: |
+          chmod +x build_pyinstaller.sh build_iso.sh
+          ./build_pyinstaller.sh
+
+      - name: Verify ISOs and create checksums
+        run: |
+          test -s dist/SpOS2-N.iso
+          test -s dist/SpOS2-Programmer.iso
+          test -s dist/SpOS2-Premium.iso
+          cd dist
+          sha256sum SpOS2-N.iso SpOS2-Programmer.iso SpOS2-Premium.iso > SHA256SUMS
+          ls -lh *.iso SHA256SUMS
+
+      - name: Upload ISO files
+        uses: actions/upload-artifact@v7
+        with:
+          name: SpOS2-3-ISOs
+          path: |
+            dist/SpOS2-N.iso
+            dist/SpOS2-Programmer.iso
+            dist/SpOS2-Premium.iso
+            dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 14
